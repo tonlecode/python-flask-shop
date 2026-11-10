@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-60">
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="badge bg-warning text-dark mb-3 px-3 py-2 fs-6">🔥 Hot Deals Today</span>
+                <h1 class="hero-title">Discover Amazing<br><span class="text-gradient">Products</span> Online</h1>
+                <p class="hero-subtitle">Shop the best products from Cambodia and around the world. Quality guaranteed, fast delivery, best prices.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-shopping-bag me-2"></i>Shop Now
+                    </a>
+                    <a href="#categories" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-th-large me-2"></i>Browse Categories
+                    </a>
+                </div>
+                <div class="hero-stats mt-4 d-flex gap-4">
+                    <div class="text-center">
+                        <div class="stat-number">{{ total_products }}+</div>
+                        <div class="stat-label">Products</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="stat-number">{{ total_users }}+</div>
+                        <div class="stat-label">Customers</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="stat-number">{{ total_orders }}+</div>
+                        <div class="stat-label">Orders</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <div class="hero-image-wrapper">
+                    <img src="https://picsum.photos/seed/hero/600/450" alt="Shopping" class="hero-img">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES STRIP -->
+<section class="features-strip">
+    <div class="container">
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <div class="feature-item text-center">
+                    <i class="fas fa-shipping-fast feature-icon"></i>
+                    <h6 class="mb-1">Free Shipping</h6>
+                    <small class="text-muted">On orders over $50</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-item text-center">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h6 class="mb-1">Secure Payment</h6>
+                    <small class="text-muted">100% protected</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-item text-center">
+                    <i class="fas fa-undo feature-icon"></i>
+                    <h6 class="mb-1">Easy Returns</h6>
+                    <small class="text-muted">30-day return policy</small>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="feature-item text-center">
+                    <i class="fas fa-headset feature-icon"></i>
+                    <h6 class="mb-1">24/7 Support</h6>
+                    <small class="text-muted">Always here for you</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section-padding" id="categories">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <span class="section-badge">Browse by</span>
+            <h2 class="section-title">Shop by Category</h2>
+            <p class="text-muted">Find what you're looking for easily</p>
+        </div>
+        <div class="row g-3">
+            {% for cat in categories %}
+            <div class="col-lg-2 col-md-4 col-6">
+                <a href="{{ url_for('category', category_id=cat.id) }}" class="text-decoration-none">
+                    <div class="category-card text-center h-100">
+                        <div class="category-icon-wrapper">
+                            <i class="{{ cat.icon }}"></i>
+                        </div>
+                        <h6 class="fw-semibold mt-2 mb-1">{{ cat.name }}</h6>
+                        <small class="text-muted">{{ cat.products|length }} items</small>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED PRODUCTS -->
+<section class="section-padding bg-light-custom">
+    <div class="container">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="section-badge">Handpicked</span>
+                <h2 class="section-title mb-0">Featured Products</h2>
+            </div>
+            <a href="{{ url_for('products') }}" class="btn btn-outline-primary">View All <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for product in featured %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                {% include 'shared/product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- PROMO BANNER -->
+<section class="promo-banner">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="promo-card promo-blue">
+                    <div class="promo-content">
+                        <span class="promo-label">Special Offer</span>
+                        <h3>Electronics Up to<br><strong>30% OFF</strong></h3>
+                        <a href="{{ url_for('products') }}?category=1" class="btn btn-white mt-2">Shop Now</a>
+                    </div>
+                    <i class="fas fa-laptop promo-icon"></i>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="promo-card promo-orange">
+                    <div class="promo-content">
+                        <span class="promo-label">New Arrivals</span>
+                        <h3>Fashion Collection<br><strong>2024</strong></h3>
+                        <a href="{{ url_for('products') }}?category=2" class="btn btn-white mt-2">Shop Now</a>
+                    </div>
+                    <i class="fas fa-tshirt promo-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NEW PRODUCTS -->
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="section-badge">Just arrived</span>
+                <h2 class="section-title mb-0">New Products</h2>
+            </div>
+            <a href="{{ url_for('products') }}?sort=newest" class="btn btn-outline-primary">View All <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for product in new_products %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                {% include 'shared/product_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter-section">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <h3 class="fw-bold text-white mb-2"><i class="fas fa-envelope me-2"></i>Subscribe to Newsletter</h3>
+                <p class="text-white-50 mb-4">Get the latest deals and offers directly to your inbox.</p>
+                <form class="d-flex gap-2" onsubmit="return false;">
+                    <input type="email" class="form-control form-control-lg" placeholder="Enter your email address">
+                    <button class="btn btn-warning btn-lg px-4 text-nowrap">Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

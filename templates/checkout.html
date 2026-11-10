@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4"><i class="fas fa-credit-card me-2"></i>Checkout</h2>
+
+    <div class="row g-4">
+        <!-- Checkout Form -->
+        <div class="col-lg-7">
+            <form action="{{ url_for('checkout') }}" method="POST" id="checkoutForm">
+                <!-- Shipping Details -->
+                <div class="checkout-card mb-4">
+                    <div class="checkout-card-header">
+                        <i class="fas fa-map-marker-alt me-2"></i>Shipping Information
+                    </div>
+                    <div class="checkout-card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Full Name</label>
+                                <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" name="phone" placeholder="e.g. 012 345 678"
+                                       value="{{ user.phone }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Delivery Address <span class="text-danger">*</span></label>
+                                <textarea class="form-control" name="address" rows="3"
+                                          placeholder="Street, Village, District, Province..."
+                                          required>{{ user.address }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Order Note (optional)</label>
+                                <textarea class="form-control" name="note" rows="2" placeholder="Any special instructions..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="checkout-card mb-4">
+                    <div class="checkout-card-header">
+                        <i class="fas fa-wallet me-2"></i>Payment Method
+                    </div>
+                    <div class="checkout-card-body">
+                        <div class="payment-options">
+                            <label class="payment-option selected">
+                                <input type="radio" name="payment" value="cod" checked>
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Cash on Delivery</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="aba">
+                                <i class="fas fa-university"></i>
+                                <span>ABA Bank Transfer</span>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="wing">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span>Wing Money</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="placeOrderBtn">
+                    <i class="fas fa-check-circle me-2"></i>Place Order
+                </button>
+            </form>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-5">
+            <div class="cart-summary sticky-top" style="top: 80px;">
+                <h5 class="fw-bold mb-4"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                {% for item in items %}
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="position-relative">
+                        <img src="{{ item.product.image_url or 'https://picsum.photos/seed/' + item.product.id|string + '/60/60' }}"
+                             alt="{{ item.product.name }}" class="rounded" width="60" height="60" style="object-fit:cover;">
+                        <span class="cart-qty-badge">{{ item.qty }}</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="mb-0 fw-semibold small">{{ item.product.name }}</p>
+                        <small class="text-muted">${{ "%.2f"|format(item.product.price) }} each</small>
+                    </div>
+                    <span class="fw-bold">${{ "%.2f"|format(item.subtotal) }}</span>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>${{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span class="text-success">{% if total >= 50 %}FREE{% else %}$5.00{% endif %}</span>
+                </div>
+                <hr>
+                <div class="summary-total">
+                    <span class="fw-bold">Total</span>
+                    <span class="text-primary fw-bold fs-4">
+                        ${{ "%.2f"|format(total + (0 if total >= 50 else 5)) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Payment option selection
+document.querySelectorAll('.payment-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+    });
+});
+
+// Confirm before placing order
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('placeOrderBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

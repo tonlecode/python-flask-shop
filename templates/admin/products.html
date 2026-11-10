@@ -1,0 +1,115 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h5 class="fw-bold mb-0">All Products</h5>
+        <small class="text-muted">{{ products.total }} products total</small>
+    </div>
+    <a href="{{ url_for('admin_product_add') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add Product
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:50px">#</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Featured</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products.items %}
+                <tr>
+                    <td class="text-muted small">{{ product.id }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{{ product.image_url or 'https://picsum.photos/seed/' + product.id|string + '/50/50' }}"
+                                 width="45" height="45" style="object-fit:cover; border-radius:8px;">
+                            <div>
+                                <a href="{{ url_for('product_detail', product_id=product.id) }}" class="fw-semibold text-dark text-decoration-none" target="_blank">
+                                    {{ product.name }}
+                                </a>
+                                <br><small class="text-muted">{{ product.reviews|length }} reviews · ★{{ product.avg_rating }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if product.category %}
+                        <span class="badge bg-secondary">{{ product.category.name }}</span>
+                        {% else %}<span class="text-muted">—</span>{% endif %}
+                    </td>
+                    <td>
+                        <strong>${{ "%.2f"|format(product.price) }}</strong>
+                        {% if product.original_price %}
+                        <br><small class="text-muted text-decoration-line-through">${{ "%.2f"|format(product.original_price) }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if product.stock == 0 %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                        {% elif product.stock < 5 %}
+                        <span class="badge bg-warning text-dark">{{ product.stock }} (Low)</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ product.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if product.is_featured %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Yes</span>
+                        {% else %}<span class="text-muted">—</span>{% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ url_for('admin_product_edit', product_id=product.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ url_for('admin_product_delete', product_id=product.id) }}" method="POST"
+                                  onsubmit="return confirm('Delete {{ product.name }}?')">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No products found</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if products.pages > 1 %}
+    <div class="p-3 border-top d-flex justify-content-center">
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                {% if products.has_prev %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('admin_products', page=products.prev_num) }}">‹</a></li>
+                {% endif %}
+                {% for p in products.iter_pages() %}
+                    {% if p %}
+                    <li class="page-item {% if p == products.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin_products', page=p) }}">{{ p }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                {% if products.has_next %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('admin_products', page=products.next_num) }}">›</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

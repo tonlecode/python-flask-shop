@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold"><i class="fas fa-shopping-cart me-2"></i>Shopping Cart
+                <span class="badge bg-primary ms-2">{{ items|length }} items</span>
+            </h2>
+        </div>
+    </div>
+
+    {% if items %}
+    <div class="row g-4">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="cart-table-wrapper">
+                <table class="table cart-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-center">Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="{{ item.product.image_url or 'https://picsum.photos/seed/' + item.product.id|string + '/80/80' }}"
+                                         alt="{{ item.product.name }}" class="cart-item-img">
+                                    <div>
+                                        <a href="{{ url_for('product_detail', product_id=item.product.id) }}" class="fw-semibold text-dark text-decoration-none">
+                                            {{ item.product.name }}
+                                        </a>
+                                        {% if item.product.category %}
+                                        <br><small class="text-muted">{{ item.product.category.name }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="fw-semibold">${{ "%.2f"|format(item.product.price) }}</span>
+                            </td>
+                            <td class="text-center align-middle">
+                                <form action="{{ url_for('cart_update') }}" method="POST" class="d-inline-flex align-items-center">
+                                    <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                    <div class="qty-control-sm">
+                                        <button type="submit" name="qty" value="{{ item.qty - 1 }}" class="qty-btn-sm">-</button>
+                                        <span class="qty-display">{{ item.qty }}</span>
+                                        <button type="submit" name="qty" value="{{ item.qty + 1 }}" class="qty-btn-sm"
+                                                {% if item.qty >= item.product.stock %}disabled{% endif %}>+</button>
+                                    </div>
+                                </form>
+                            </td>
+                            <td class="text-center align-middle">
+                                <span class="fw-bold text-primary">${{ "%.2f"|format(item.subtotal) }}</span>
+                            </td>
+                            <td class="text-center align-middle">
+                                <a href="{{ url_for('cart_remove', product_id=item.product.id) }}"
+                                   class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Cart Actions -->
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                <a href="{{ url_for('products') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                </a>
+                <a href="{{ url_for('cart_clear') }}" class="btn btn-outline-danger"
+                   onclick="return confirm('Clear entire cart?')">
+                    <i class="fas fa-trash me-2"></i>Clear Cart
+                </a>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h5 class="fw-bold mb-4"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+                <div class="summary-row">
+                    <span>Subtotal ({{ items|length }} items)</span>
+                    <span>${{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span class="text-success">{% if total >= 50 %}FREE{% else %}$5.00{% endif %}</span>
+                </div>
+                {% if total < 50 %}
+                <div class="free-shipping-notice">
+                    <i class="fas fa-truck me-1"></i>
+                    Add ${{ "%.2f"|format(50 - total) }} more for free shipping!
+                </div>
+                {% endif %}
+                <hr>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span class="text-primary fw-bold fs-5">
+                        ${{ "%.2f"|format(total + (0 if total >= 50 else 5)) }}
+                    </span>
+                </div>
+
+                {% if current_user %}
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary w-100 btn-lg mt-3">
+                    <i class="fas fa-lock me-2"></i>Proceed to Checkout
+                </a>
+                {% else %}
+                <a href="{{ url_for('login', next=url_for('checkout')) }}" class="btn btn-primary w-100 btn-lg mt-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Checkout
+                </a>
+                {% endif %}
+
+                <div class="payment-secure mt-3 text-center">
+                    <small class="text-muted"><i class="fas fa-shield-alt me-1 text-success"></i>Secure & Encrypted Payment</small>
+                    <div class="mt-2">
+                        <i class="fab fa-cc-visa me-2 fs-5 text-muted"></i>
+                        <i class="fab fa-cc-mastercard me-2 fs-5 text-muted"></i>
+                        <i class="fab fa-cc-paypal fs-5 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="empty-cart text-center py-5">
+        <i class="fas fa-shopping-cart fa-5x text-muted mb-4"></i>
+        <h3 class="text-muted fw-light">Your cart is empty</h3>
+        <p class="text-muted mb-4">Browse our products and add items to your cart.</p>
+        <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg px-5">
+            <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

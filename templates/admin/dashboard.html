@@ -1,0 +1,181 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small mb-1">Total Products</p>
+                    <h3 class="fw-bold mb-0">{{ stats.total_products }}</h3>
+                </div>
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                    <i class="fas fa-box"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('admin_products') }}" class="small text-primary mt-2 d-block">View all →</a>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small mb-1">Total Orders</p>
+                    <h3 class="fw-bold mb-0">{{ stats.total_orders }}</h3>
+                </div>
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('admin_orders') }}" class="small text-primary mt-2 d-block">View all →</a>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small mb-1">Total Users</p>
+                    <h3 class="fw-bold mb-0">{{ stats.total_users }}</h3>
+                </div>
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('admin_users') }}" class="small text-primary mt-2 d-block">View all →</a>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small mb-1">Revenue</p>
+                    <h3 class="fw-bold mb-0">${{ "%.0f"|format(stats.total_revenue) }}</h3>
+                </div>
+                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+            <small class="text-success mt-2 d-block">All time total</small>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small mb-1">Pending Orders</p>
+                    <h3 class="fw-bold mb-0 text-warning">{{ stats.pending_orders }}</h3>
+                </div>
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('admin_orders', status='pending') }}" class="small text-warning mt-2 d-block">Review →</a>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="text-muted small mb-1">Low Stock</p>
+                    <h3 class="fw-bold mb-0 text-danger">{{ stats.low_stock }}</h3>
+                </div>
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+            <a href="{{ url_for('admin_products') }}" class="small text-danger mt-2 d-block">Check →</a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions + Recent Orders -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span><i class="fas fa-clock me-2 text-primary"></i>Recent Orders</span>
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td><strong class="text-primary">#{{ '%04d'|format(order.id) }}</strong></td>
+                            <td>{{ order.user.username }}</td>
+                            <td><strong>${{ "%.2f"|format(order.total) }}</strong></td>
+                            <td>
+                                {% if order.status == 'pending' %}<span class="badge bg-warning text-dark">Pending</span>
+                                {% elif order.status == 'processing' %}<span class="badge bg-info">Processing</span>
+                                {% elif order.status == 'shipped' %}<span class="badge bg-primary">Shipped</span>
+                                {% elif order.status == 'delivered' %}<span class="badge bg-success">Delivered</span>
+                                {% elif order.status == 'cancelled' %}<span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ order.created_at.strftime('%b %d, %Y') }}</small></td>
+                            <td>
+                                <form action="{{ url_for('admin_order_update', order_id=order.id) }}" method="POST" class="d-flex gap-1">
+                                    <select class="form-select form-select-sm" name="status" style="min-width:100px">
+                                        {% for s in ['pending','processing','shipped','delivered','cancelled'] %}
+                                        <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s.title() }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="btn btn-sm btn-primary" type="submit"><i class="fas fa-check"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6" class="text-center text-muted py-4">No orders yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="admin-card mb-4">
+            <div class="admin-card-header"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</div>
+            <div class="p-3 d-grid gap-2">
+                <a href="{{ url_for('admin_product_add') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add New Product
+                </a>
+                <a href="{{ url_for('admin_categories') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-2"></i>Add Category
+                </a>
+                <a href="{{ url_for('admin_orders', status='pending') }}" class="btn btn-outline-warning">
+                    <i class="fas fa-clock me-2"></i>Pending Orders ({{ stats.pending_orders }})
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-outline-info">
+                    <i class="fas fa-users me-2"></i>Manage Users
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header"><i class="fas fa-info-circle me-2 text-info"></i>System Info</div>
+            <div class="p-3">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted">Flask</td><td class="fw-semibold">3.1.0</td></tr>
+                    <tr><td class="text-muted">SQLite</td><td class="fw-semibold">Local DB</td></tr>
+                    <tr><td class="text-muted">Python</td><td class="fw-semibold">3.x</td></tr>
+                    <tr><td class="text-muted">Admin</td><td class="fw-semibold text-success">{{ current_user.username }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

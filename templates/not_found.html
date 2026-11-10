@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{% if error == 500 %}Server Error{% else %}Page Not Found{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="error-number">{{ error or '404' }}</div>
+            <h2 class="fw-bold mb-3">
+                {% if error == 500 %}Oops! Something went wrong{% else %}Page Not Found{% endif %}
+            </h2>
+            <p class="text-muted fs-5 mb-4">
+                {% if error == 500 %}
+                    We encountered an internal server error. Please try again later.
+                {% else %}
+                    The page you're looking for doesn't exist or has been moved.
+                {% endif %}
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-home me-2"></i>Go Home
+                </a>
+                <a href="{{ url_for('products') }}" class="btn btn-outline-primary btn-lg px-5">
+                    <i class="fas fa-shopping-bag me-2"></i>Shop Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

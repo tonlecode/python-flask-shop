@@ -1,0 +1,82 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Categories{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Add Category Form -->
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header"><i class="fas fa-plus me-2 text-primary"></i>Add New Category</div>
+            <div class="p-4">
+                <form action="{{ url_for('admin_category_add') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" placeholder="Category name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" name="description" rows="2" placeholder="Brief description"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Icon (Font Awesome class)</label>
+                        <input type="text" class="form-control" name="icon" value="fas fa-tag" placeholder="fas fa-laptop">
+                        <small class="text-muted">Example: fas fa-laptop, fas fa-tshirt</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus me-2"></i>Add Category
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories List -->
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <span><i class="fas fa-th-large me-2 text-primary"></i>All Categories</span>
+                <span class="badge bg-primary">{{ categories|length }}</span>
+            </div>
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Products</th>
+                        <th>Icon</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td class="text-muted small">{{ cat.id }}</td>
+                        <td><strong>{{ cat.name }}</strong></td>
+                        <td><small class="text-muted">{{ cat.description or '—' }}</small></td>
+                        <td>
+                            <span class="badge bg-secondary">{{ cat.products|length }}</span>
+                        </td>
+                        <td>
+                            <i class="{{ cat.icon }} text-primary me-1"></i>
+                            <small class="text-muted">{{ cat.icon }}</small>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('admin_category_delete', cat_id=cat.id) }}" method="POST"
+                                  onsubmit="return confirm('Delete category {{ cat.name }}? Products in this category will have no category.')">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">No categories yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
